@@ -3,6 +3,7 @@ package com.sunnyweather.android
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import okhttp3.logging.HttpLoggingInterceptor
 
 class MyApp : Application() {
     companion object {
@@ -14,5 +15,6 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         context = applicationContext
+
     }
 }

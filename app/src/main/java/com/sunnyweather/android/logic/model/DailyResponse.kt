@@ -12,7 +12,7 @@ data class DailyResponse(val status: String, val result: Result) {
 
     data class Temperature(val max: Float, val min: Float)
 
-    data class Skycon(val vaule: String, val date: String)
+    data class Skycon(val value: String, val date: String)
 
     data class LifeIndex(
         val coldRisk: List<LifeDescription>, val carWashing: List<LifeDescription>,
