@@ -1,16 +1,20 @@
 package com.sunnyweather.android.ui.weather
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowInsetsAnimation
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.sunnyweather.android.R
@@ -32,6 +36,7 @@ class WeatherActivity : AppCompatActivity() {
 
     val viewModel by lazy { ViewModelProvider(this).get(WeatherViewModel::class.java) }
 
+    @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_weather)
@@ -55,8 +60,40 @@ class WeatherActivity : AppCompatActivity() {
                 ShowToast("无法成功获取天气信息")
                 result.exceptionOrNull()?.printStackTrace()
             }
+            swipeRefresh.isRefreshing = false
         })
+        swipeRefresh.setColorSchemeColors(R.color.colorPrimary)
+        refreshWeather()
+        swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
         viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+
+        navBtn.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerOpened(drawerView: View) {}
+
+            override fun onDrawerClosed(drawerView: View) {
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE)
+                        as InputMethodManager
+                manager.hideSoftInputFromWindow(
+                    drawerView.windowToken,
+                    InputMethodManager.HIDE_NOT_ALWAYS
+                )
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+
+        })
+    }
+
+    fun refreshWeather() {
+        viewModel.refreshWeather(viewModel.locationLng, viewModel.locationLat)
+        swipeRefresh.isRefreshing = true
     }
 
     private fun showWeatherInfo(weather: Weather) {
@@ -81,26 +118,26 @@ class WeatherActivity : AppCompatActivity() {
                 forecastLayout,
                 false
             )
-            val dateInfo=view.findViewById(R.id.dateInfo) as TextView
-            val skyIcon=view.findViewById(R.id.skyIcon) as ImageView
-            val skyInfo=view.findViewById(R.id.skyInfo) as TextView
-            val temperatureInfo=view.findViewById(R.id.temperatureInfo) as TextView
-            val simpleDateFormat=SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val time=skycon.date.substring(0, 10)
-            dateInfo.text= time
-            val sky= getSky(skycon.value)
+            val dateInfo = view.findViewById(R.id.dateInfo) as TextView
+            val skyIcon = view.findViewById(R.id.skyIcon) as ImageView
+            val skyInfo = view.findViewById(R.id.skyInfo) as TextView
+            val temperatureInfo = view.findViewById(R.id.temperatureInfo) as TextView
+            val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val time = skycon.date.substring(0, 10)
+            dateInfo.text = time
+            val sky = getSky(skycon.value)
             skyIcon.setImageResource(sky.icon)
-            skyInfo.text=sky.info
-            val tempText="${temperature.min.toInt()} ~ ${temperature.max.toInt()} ℃"
-            temperatureInfo.text=tempText
+            skyInfo.text = sky.info
+            val tempText = "${temperature.min.toInt()} ~ ${temperature.max.toInt()} ℃"
+            temperatureInfo.text = tempText
             forecastLayout.addView(view)
         }
         //填充life_index.xml布局数据
-        val lifeIndex= daily.lifeIndex
-        coldRiskText.text=lifeIndex.coldRisk[0].desc
-        dressText.text=lifeIndex.dressing[0].desc
-        ultravioletText.text=lifeIndex.ultraviolet[0].desc
-        carWashText.text=lifeIndex.carWashing[0].desc
-        weatherLayout.visibility=View.VISIBLE
+        val lifeIndex = daily.lifeIndex
+        coldRiskText.text = lifeIndex.coldRisk[0].desc
+        dressText.text = lifeIndex.dressing[0].desc
+        ultravioletText.text = lifeIndex.ultraviolet[0].desc
+        carWashText.text = lifeIndex.carWashing[0].desc
+        weatherLayout.visibility = View.VISIBLE
     }
 }
